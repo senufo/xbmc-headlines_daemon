@@ -15,8 +15,8 @@ from BeautifulSoup import BeautifulStoneSoup
 
 
 __author__     = "Senufo"
-__scriptid__   = "script.rss_atom"
-__scriptname__ = "rss_daemon"
+__scriptid__   = "script.headlines"
+__scriptname__ = "headlines_daemon"
 
 Addon          = xbmcaddon.Addon(__scriptid__)
 
@@ -29,6 +29,11 @@ __resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources',
                                                  'lib'))
 
 #sys.path.append (__resource__)
+#Teste si le repertoire script.headlines existe
+DATA_PATH = xbmc.translatePath( "special://profile/addon_data/script.headlines/")
+if not os.path.exists(DATA_PATH): os.makedirs(DATA_PATH)
+
+
 RssFeedsPath = xbmc.translatePath('special://userdata/RssFeeds.xml')
 try:
     feedsTree = parse(RssFeedsPath)
@@ -86,7 +91,7 @@ while (not xbmc.abortRequested):
                 filename = feed['url']
                 filename = re.sub('^http://.*/','Rss-',filename)
                 #self.RssFeeds = xbmc.translatePath('special://userdata/%s' % filename)
-                RssFeeds = '%s/%s' % (__profile__,filename)
+                RssFeeds = '%s/%s' % (DATA_PATH,filename)
                 #teste si le fichier existe
                 if (os.path.isfile(RssFeeds)):
                     date_modif = os.stat(RssFeeds).st_mtime
@@ -112,6 +117,7 @@ while (not xbmc.abortRequested):
                     #Le fichier n'existe pas on le telecharge
                     urllib.urlretrieve(feed['url'], filename = RssFeeds)
                     #On parse le fichier rss et on le sauve sur le disque
+                    print "Download = %s " % RssFeeds
                     doc = feedparser.parse('file://%s' % RssFeeds)
                     #Sauve le doc parse directement
                     output = open(('%s-pickle' % RssFeeds), 'wb')
