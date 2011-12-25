@@ -127,4 +127,4 @@ while (not xbmc.abortRequested):
 
     #initialise start time
     start_time = time.time()
-    time.sleep( 5 )
+    time.sleep( .5 )
