@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import xbmc, xbmcgui
 import xbmcaddon
 import time
@@ -124,7 +125,105 @@ while (not xbmc.abortRequested):
                     # Pickle dictionary using protocol 0.
                     pickle.dump(doc, output)
                     output.close()
-
+                    #²ParseRSS(RssFeeds)
     #initialise start time
     start_time = time.time()
     time.sleep( .5 )
+
+#Nettoie le code HTML d'après rssclient de xbmc
+def htmlentitydecode(s):
+    # code from http://snipplr.com/view.php?codeview&id=15261
+    # First convert alpha entities (such as &eacute;)
+    # (Inspired from http://mail.python.org/pipermail/python-list/2007-June/443813.html)
+    def entity2char(m):
+        entity = m.group(1)
+        if entity in htmlentitydefs.name2codepoint:
+            return unichr(htmlentitydefs.name2codepoint[entity])
+        return u" "  # Unknown entity: We replace with a space.
+    
+    t = re.sub(u'&(%s);' % u'|'.join(htmlentitydefs.name2codepoint), entity2char, s)
+  
+    # Then convert numerical entities (such as &#233;)
+    t = re.sub(u'&#(\d+);', lambda x: unichr(int(x.group(1))), t)
+   
+    # Then convert hexa entities (such as &#x00E9;)
+    return re.sub(u'&#x(\w+);', lambda x: unichr(int(x.group(1),16)), t)
+
+def cleanText(txt):
+    p = re.compile(r'\s+')
+    txt = p.sub(' ', txt)
+    
+    txt = self.htmlentitydecode(txt)
+    
+    p = re.compile(r'<[^<]*?/?>')
+    return p.sub('', txt)
+  
+def ParseRSS(RssName):
+    """
+    Parse RSS or ATOM file with feedparser
+    """
+    print "RssName = %s " % RssName
+    #Recupere l'adresse du flux dans self.RssFeedName
+    RssFeeds = RssName
+    NbNews = 0
+    # parse the document
+    #Si c'est deja fait on lit le fichier 
+    if (os.path.isfile('%s-pickle' % self.RssFeeds)):
+        pkl_file = open(('%s-pickle' % self.RssFeeds), 'rb')
+        doc = pickle.load(pkl_file)
+        pkl_file.close()
+    else:
+        #Sinon on le parse
+        doc = feedparser.parse('file://%s' % self.RssFeeds)
+    #Récupère le titre du flux
+    img_name = ' '
+    #Vide les headlines lors d'un nouveau appel
+    headlines = []
+    #On recupere les tags suivants :
+    #title, entry.content, enclosure pour les images
+    #et date
+    if doc.status < 400:
+        for entry in doc['entries']:
+            try:
+                title = unicode(entry.title)
+                #link  = unicode(entry.link)
+                #Recupere un media associe
+                if entry.has_key('enclosures'):
+                    if entry.enclosures:
+                        print "Enclosure = %s " % entry.enclosures[0].href
+                        print "Enclosure = %s " % entry.enclosures[0].type
+                        #actuellement que les images
+                        if 'image' in entry.enclosures[0].type:
+                            link_img = entry.enclosures[0].href
+                            img_name = self.download(link_img,'/tmp/img.jpg')
+                #C'est ici que le recupere la news²
+                if entry.has_key('content') and len(entry['content']) >= 1:
+                    description = unicode(entry['content'][0].value)
+                    #type contient le type de texte : html, plain text, etc...
+                    type = entry['content'][0].type
+                else:
+                    #Si pas de content on essaye le summary_detail
+                    description = unicode(entry['summary_detail'].value)
+                    type = 'text'
+                #Recuperation de la date de la news
+                if entry.has_key('date'):
+                    date = entry['date']
+                else:
+                    date = 'unknown'
+                #On rempli les news
+                headlines.append((title, date, description, type, img_name))
+                NbNews += 1
+                #On vide le nom de l'image pour le prochain tour
+                img_name = ' '
+            except AttributeError, e:
+                print "AttributeError : %s" % str(e)
+                pass
+    else:
+        print ('Error %s, getting %r' % (doc.status, url))
+    #On sauve le headlines dans un fichier
+    output = open(('%s-headlines' % self.RssFeeds), 'wb')
+    # Pickle dictionary using protocol 0.
+    pickle.dump(headlines, output)
+    output.close()
+
+
