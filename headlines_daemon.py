@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui
 import xbmcaddon
-import time
 #python modules
 import os, time, stat, re, copy, time
 from xml.dom.minidom import parse, Document, _write_data, Node, Element
 import pickle
+import glob
 
 # rdf modules
 import feedparser
@@ -29,9 +29,13 @@ __profile__    = xbmc.translatePath(Addon.getAddonInfo('profile'))
 __resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources',
                                                  'lib'))
 #####################################################################
-def download(src,dst):
-    tmpname = xbmc.translatePath('special://temp/%s' % xbmc.getCacheThumbName(src))
-    print "tmpname = %s " % tmpname 
+def download(path,src,dst):
+    #tmpname = xbmc.translatePath('special://temp/%s' % xbmc.getCacheThumbName(src))
+    tmpname = ('%s-img/%s' % (path,xbmc.getCacheThumbName(src)))
+    print "tmpnname 1 = %s " % tmpname
+    #tmpname = xbmc.translatePath('special://userdata/%s' % (tmpname))
+    print "path = %s, src = %s" % (path,src)
+    print "tmpname = %s, cache = %s " % (tmpname,xbmc.getCacheThumbName(src))
     if os.path.exists(tmpname):
         os.remove(tmpname)
     urllib.urlretrieve(src, filename = tmpname)
@@ -95,6 +99,13 @@ def ParseRSS(RssName):
     if doc.status < 400:
         for entry in doc['entries']:
             try:
+                #On efface toutes les anciennes images des flux
+                if not os.path.isdir('%s-img' % RssFeeds) : os.mkdir('%s-img' % RssFeeds)
+                #Img_path = xbmc.translatePath('special://temp/')
+                #files = glob.glob("%s/%s" % (('%s-img' % RssFeeds),'*.tbn'))
+                #for f in files:
+                #        os.remove(f)
+
                 title = unicode(entry.title)
                 #link  = unicode(entry.link)
                 #Recupere un media associe
@@ -105,8 +116,8 @@ def ParseRSS(RssName):
                         #actuellement que les images
                         if 'image' in entry.enclosures[0].type:
                             link_img = entry.enclosures[0].href
-                            img_name = download(link_img,'/tmp/img.jpg')
-                #C'est ici que le recupere la news²
+                            img_name = download(RssFeeds,link_img,'/tmp/img.jpg')
+                #C'est ici que le recupere la news
                 if entry.has_key('content') and len(entry['content']) >= 1:
                     description = unicode(entry['content'][0].value)
                     #type contient le type de texte : html, plain text, etc...
@@ -198,7 +209,6 @@ while (not xbmc.abortRequested):
             #if (current_time > (get_time + updateinterval)):
             if True:
                 get_time = time.time()    
-                #http://www.lequipe.fr/Xml/actu_rss.xml
                 filename = feed['url']
                 filename = re.sub('^http://.*/','Rss-',filename)
                 #self.RssFeeds = xbmc.translatePath('special://userdata/%s' % filename)
@@ -236,7 +246,7 @@ while (not xbmc.abortRequested):
                     # Pickle dictionary using protocol 0.
                     pickle.dump(doc, output)
                     output.close()
-                ParseRSS(RssFeeds)
+                    ParseRSS(RssFeeds)
     #initialise start time
     start_time = time.time()
     time.sleep( .5 )
