@@ -201,7 +201,7 @@ while (not xbmc.abortRequested):
         i = 0
         for feed in feedsList[setName]['feedslist']:
             i += 1
-            #print "=>url = %s " % feed['url']
+            print "=>url = %s " % feed['url']
             updateinterval = int(feed['updateinterval']) * 60
             current_time = time.time()
             diff_time  = current_time - (get_time + updateinterval)
@@ -227,12 +227,21 @@ while (not xbmc.abortRequested):
                         #On le parse de nouveau
                         #On parse le fichier rss et on le sauve sur le disque
                         doc = feedparser.parse('file://%s' % RssFeeds)
-                        #Sauve le doc parse directement
-                        output = open(('%s-pickle' % RssFeeds), 'wb')
-                        # Pickle dictionary using protocol 0.
-                        pickle.dump(doc, output)
-                        output.close()
-                        ParseRSS(RssFeeds)
+                        print "Version = %s " % doc.version
+                        if doc.version != '':
+                            #Sauve le doc parse directement
+                            output = open(('%s-pickle' % RssFeeds), 'wb')
+                            # Pickle dictionary using protocol 0.
+                            pickle.dump(doc, output)
+                            output.close()
+                            ParseRSS(RssFeeds)
+                        #On ignore le flux
+                        else:
+                            print "Erreur RSS : %s " % RssFeeds
+                            locstr = "Erreur : %s " % RssFeeds
+                            xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
+                                                (locstr, 'Flux RSS non reconnu'))
+
 
                         print "date = %f, epoc time = %f  " % (date_modif, time.time())
                 else:
@@ -241,12 +250,21 @@ while (not xbmc.abortRequested):
                     #On parse le fichier rss et on le sauve sur le disque
                     print "Download = %s " % RssFeeds
                     doc = feedparser.parse('file://%s' % RssFeeds)
-                    #Sauve le doc parse directement
-                    output = open(('%s-pickle' % RssFeeds), 'wb')
-                    # Pickle dictionary using protocol 0.
-                    pickle.dump(doc, output)
-                    output.close()
-                    ParseRSS(RssFeeds)
+                    print "Version 248 = %s " % doc.version
+                    #Vérifie si c'est un flux rss ou atom
+                    if doc.version != '':
+                        #Sauve le doc parse directement
+                        output = open(('%s-pickle' % RssFeeds), 'wb')
+                        # Pickle dictionary using protocol 0.
+                        pickle.dump(doc, output)
+                        output.close()
+                        ParseRSS(RssFeeds)
+                    #On ignore le flux
+                    else:
+                        print "Erreur RSS : %s " % RssFeeds
+                        locstr = "Erreur : %s " % RssFeeds
+                        xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
+                                            (locstr, 'Flux RSS non reconnu'))
     #initialise start time
     start_time = time.time()
     time.sleep( .5 )
