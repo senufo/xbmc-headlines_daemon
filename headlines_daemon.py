@@ -91,6 +91,7 @@ def ParseRSS(RssName):
         doc = feedparser.parse('file://%s' % RssFeeds)
     #Récupère le titre du flux
     img_name = ' '
+    link_video = ' '
     #Vide les headlines lors d'un nouveau appel
     headlines = []
     #On recupere les tags suivants :
@@ -117,6 +118,9 @@ def ParseRSS(RssName):
                         if 'image' in entry.enclosures[0].type:
                             link_img = entry.enclosures[0].href
                             img_name = download(RssFeeds,link_img,'/tmp/img.jpg')
+                        if 'video' in entry.enclosures[0].type:
+                            link_video = entry.enclosures[0].href
+                            print "link_video = %s " % link_video
                 #C'est ici que le recupere la news
                 if entry.has_key('content') and len(entry['content']) >= 1:
                     description = unicode(entry['content'][0].value)
@@ -132,10 +136,12 @@ def ParseRSS(RssName):
                 else:
                     date = 'unknown'
                 #On rempli les news
-                headlines.append((title, date, description, type, img_name))
+                headlines.append((title, date, description, type, img_name,
+                                  link_video))
                 NbNews += 1
                 #On vide le nom de l'image pour le prochain tour
                 img_name = ' '
+                link_video = ' '
             except AttributeError, e:
                 print "AttributeError : %s" % str(e)
                 pass
