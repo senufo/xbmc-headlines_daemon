@@ -11,10 +11,6 @@ import glob
 import feedparser
 import urllib
 
-# to decode html entities
-from BeautifulSoup import BeautifulStoneSoup
-
-
 __author__     = "Senufo"
 __scriptid__   = "script.headlines"
 __scriptname__ = "headlines_daemon"
@@ -28,21 +24,15 @@ __language__   = Addon.getLocalizedString
 __profile__    = xbmc.translatePath(Addon.getAddonInfo('profile'))
 __resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources',
                                                  'lib'))
-#####################################################################
 def download(path,src,dst):
-    #tmpname = xbmc.translatePath('special://temp/%s' % xbmc.getCacheThumbName(src))
+    """
+    Download image and caching in script directory
+    """
     tmpname = ('%s-img/%s' % (path,xbmc.getCacheThumbName(src)))
-    print "tmpnname 1 = %s " % tmpname
-    #tmpname = xbmc.translatePath('special://userdata/%s' % (tmpname))
-    print "path = %s, src = %s" % (path,src)
-    print "tmpname = %s, cache = %s " % (tmpname,xbmc.getCacheThumbName(src))
     if os.path.exists(tmpname):
         os.remove(tmpname)
     urllib.urlretrieve(src, filename = tmpname)
-    #os.rename(tmpname, dst)
     return tmpname
-
-
 
 #Nettoie le code HTML d'après rssclient de xbmc
 def htmlentitydecode(s):
@@ -91,7 +81,7 @@ def ParseRSS(RssName):
         doc = feedparser.parse('file://%s' % RssFeeds)
     #Récupère le titre du flux
     img_name = ' '
-    link_video = ' '
+    link_video = 'False'
     #Vide les headlines lors d'un nouveau appel
     headlines = []
     #On recupere les tags suivants :
@@ -102,18 +92,12 @@ def ParseRSS(RssName):
             try:
                 #On efface toutes les anciennes images des flux
                 if not os.path.isdir('%s-img' % RssFeeds) : os.mkdir('%s-img' % RssFeeds)
-                #Img_path = xbmc.translatePath('special://temp/')
-                #files = glob.glob("%s/%s" % (('%s-img' % RssFeeds),'*.tbn'))
-                #for f in files:
-                #        os.remove(f)
-
                 title = unicode(entry.title)
-                #link  = unicode(entry.link)
                 #Recupere un media associe
                 if entry.has_key('enclosures'):
                     if entry.enclosures:
-                        print "Enclosure = %s " % entry.enclosures[0].href
-                        print "Enclosure = %s " % entry.enclosures[0].type
+                        #print "Enclosure = %s " % entry.enclosures[0].href
+                        #print "Enclosure = %s " % entry.enclosures[0].type
                         #actuellement que les images
                         if 'image' in entry.enclosures[0].type:
                             link_img = entry.enclosures[0].href
@@ -139,9 +123,9 @@ def ParseRSS(RssName):
                 headlines.append((title, date, description, type, img_name,
                                   link_video))
                 NbNews += 1
-                #On vide le nom de l'image pour le prochain tour
+                #On vide le nom de l'image et l'adresse de la video  pour le prochain tour
                 img_name = ' '
-                link_video = ' '
+                link_video = 'False'
             except AttributeError, e:
                 print "AttributeError : %s" % str(e)
                 pass
@@ -153,14 +137,9 @@ def ParseRSS(RssName):
     pickle.dump(headlines, output)
     output.close()
 
-
-#####################################################################
-
-#sys.path.append (__resource__)
 #Teste si le repertoire script.headlines existe
 DATA_PATH = xbmc.translatePath( "special://profile/addon_data/script.headlines/")
 if not os.path.exists(DATA_PATH): os.makedirs(DATA_PATH)
-
 
 RssFeedsPath = xbmc.translatePath('special://userdata/RssFeeds.xml')
 try:
@@ -172,10 +151,8 @@ if feedsTree:
     #self.feedsList = self.getCurrentRssFeeds()
     feedsList = dict()
     sets = feedsTree.getElementsByTagName('set')
-    #print "SET = %s " % sets
     for s in sets:
         setName = 'set'+s.attributes["id"].value
-        #print "SETNAME = %s " % setName
         feedsList[setName] = {'feedslist':list(), 'attrs':dict()}
         #get attrs
         for attrib in s.attributes.keys():
@@ -184,15 +161,6 @@ if feedsTree:
         feeds = s.getElementsByTagName('feed')
         for feed in feeds:
             feedsList[setName]['feedslist'].append({'url':feed.firstChild.toxml(), 'updateinterval':feed.attributes['updateinterval'].value})
-    #for setName in feedsList:
-        #val = setName[0]
-        #print "%s = %s " % (setName,val)
-        #print "url = %s " % feedsList[setName]
-        #for set in feedsList[setName]:
-        #    print "SET = %s" % set
-        #for feed in feedsList[setName]['feedslist']:
-            #print "url = %s " % feed['url']
-    #print "URL = %s " % feedsList['set1']
 
 get_time = time.time() + (60)    
 
@@ -200,8 +168,6 @@ get_time = time.time() + (60)
 while (not xbmc.abortRequested):
 #Partie de recuperation de flux rss sur le net
     NbNews = 0
-    time_debut = time.time()
-    #print "TIME debut = %f " % time.time() 
     #Sauve les flux RSS
     for setName in feedsList:
         i = 0
@@ -214,13 +180,12 @@ while (not xbmc.abortRequested):
             updateinterval = int(feed['updateinterval']) * 60
             current_time = time.time()
             diff_time  = current_time - (get_time + updateinterval)
-            #print "diff_time = %f" % diff_time
             #if (current_time > (get_time + updateinterval)):
             if True:
-                get_time = time.time()    
+                get_time = time.time()
+                #On recuper l'url et on la transforme en non de fichier
                 filename = feed['url']
                 filename = re.sub('^http://.*/','Rss-',filename)
-                #self.RssFeeds = xbmc.translatePath('special://userdata/%s' % filename)
                 RssFeeds = '%s/%s' % (DATA_PATH,filename)
                 #teste si le fichier existe
                 if (os.path.isfile(RssFeeds)):
@@ -229,15 +194,19 @@ while (not xbmc.abortRequested):
                     #print "diff = %f, date_modif = %f, updateinterval %d" % (diff,date_modif,updateinterval )
                     #Si le flux est plus ancien que le updateinterval on le telecharge de nx
                     if (diff > updateinterval):
-                        print "=>filename = %s, RssFeeds = %s, url = %s, encurl = %s" % (filename,RssFeeds, feed['url'], encurl)
+                        #print "=>filename = %s, RssFeeds = %s, url = %s, encurl = %s" % (filename,RssFeeds, feed['url'], encurl)
                         #urllib.urlretrieve(feed['url'], filename = RssFeeds)
-                        urllib.urlretrieve(encurl, filename = RssFeeds)
-                        #On efface le doc deja parser
-                        os.remove('%s-pickle' % RssFeeds)
-                        #On le parse de nouveau
-                        #On parse le fichier rss et on le sauve sur le disque
-                        doc = feedparser.parse('file://%s' % RssFeeds)
-                        print "Version = %s " % doc.version
+                        #Test au cas ou pb de connexion
+                        try:
+                            urllib.urlretrieve(encurl, filename = RssFeeds)
+                            #On efface le doc deja parser
+                            os.remove('%s-pickle' % RssFeeds)
+                            #On le parse de nouveau
+                            #On parse le fichier rss et on le sauve sur le disque
+                            doc = feedparser.parse('file://%s' % RssFeeds)
+                            #print "Version = %s " % doc.version
+                        except e:
+                            print "Erreur urllib : %s " % str(e)
                         if doc.version != '':
                             #Sauve le doc parse directement
                             output = open(('%s-pickle' % RssFeeds), 'wb')
@@ -259,9 +228,9 @@ while (not xbmc.abortRequested):
                     #urllib.urlretrieve(feed['url'], filename = RssFeeds)
                     urllib.urlretrieve(encurl, filename = RssFeeds)
                     #On parse le fichier rss et on le sauve sur le disque
-                    print "Download = %s " % RssFeeds
+                    #print "Download = %s " % RssFeeds
                     doc = feedparser.parse('file://%s' % RssFeeds)
-                    print "Version 248 = %s " % doc.version
+                    #print "Version 248 = %s " % doc.version
                     #Vérifie si c'est un flux rss ou atom
                     if doc.version != '':
                         #Sauve le doc parse directement
@@ -279,5 +248,3 @@ while (not xbmc.abortRequested):
     #initialise start time
     start_time = time.time()
     time.sleep( .5 )
-
-
