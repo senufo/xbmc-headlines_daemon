@@ -186,7 +186,7 @@ if feedsTree:
         #    print "SET = %s" % set
         for feed in feedsList[setName]['feedslist']:
             print "url = %s " % feed['url']
-    print "URL = %s " % feedsList['set1']
+    #print "URL = %s " % feedsList['set1']
 
 get_time = time.time() + (60)    
 
@@ -202,6 +202,9 @@ while (not xbmc.abortRequested):
         for feed in feedsList[setName]['feedslist']:
             i += 1
             print "=>url = %s " % feed['url']
+            #Pour éviter les erreurs avec des & et espaces mal encodés
+            encurl = feed['url'].replace("amp;", "&").replace(' ', '%20')
+
             updateinterval = int(feed['updateinterval']) * 60
             current_time = time.time()
             diff_time  = current_time - (get_time + updateinterval)
@@ -220,8 +223,9 @@ while (not xbmc.abortRequested):
                     #print "diff = %f, date_modif = %f, updateinterval %d" % (diff,date_modif,updateinterval )
                     #Si le flux est plus ancien que le updateinterval on le telecharge de nx
                     if (diff > updateinterval):
-                        print "=>filename = %s, RssFeeds = %s, url = %s " % (filename,RssFeeds, feed['url'])
-                        urllib.urlretrieve(feed['url'], filename = RssFeeds)
+                        print "=>filename = %s, RssFeeds = %s, url = %s, encurl = %s" % (filename,RssFeeds, feed['url'], encurl)
+                        #urllib.urlretrieve(feed['url'], filename = RssFeeds)
+                        urllib.urlretrieve(encurl, filename = RssFeeds)
                         #On efface le doc deja parser
                         os.remove('%s-pickle' % RssFeeds)
                         #On le parse de nouveau
@@ -246,7 +250,8 @@ while (not xbmc.abortRequested):
                         print "date = %f, epoc time = %f  " % (date_modif, time.time())
                 else:
                     #Le fichier n'existe pas on le telecharge
-                    urllib.urlretrieve(feed['url'], filename = RssFeeds)
+                    #urllib.urlretrieve(feed['url'], filename = RssFeeds)
+                    urllib.urlretrieve(encurl, filename = RssFeeds)
                     #On parse le fichier rss et on le sauve sur le disque
                     print "Download = %s " % RssFeeds
                     doc = feedparser.parse('file://%s' % RssFeeds)
