@@ -1,1 +1,3 @@
 Get rss news in background for the rss/atom  reader : headlines
+with feedparser.py : http://feedparser.org/ for the latest version, Mark Pilgrim
+

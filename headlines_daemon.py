@@ -166,10 +166,10 @@ if feedsTree:
     #self.feedsList = self.getCurrentRssFeeds()
     feedsList = dict()
     sets = feedsTree.getElementsByTagName('set')
-    print "SET = %s " % sets
+    #print "SET = %s " % sets
     for s in sets:
         setName = 'set'+s.attributes["id"].value
-        print "SETNAME = %s " % setName
+        #print "SETNAME = %s " % setName
         feedsList[setName] = {'feedslist':list(), 'attrs':dict()}
         #get attrs
         for attrib in s.attributes.keys():
@@ -178,14 +178,14 @@ if feedsTree:
         feeds = s.getElementsByTagName('feed')
         for feed in feeds:
             feedsList[setName]['feedslist'].append({'url':feed.firstChild.toxml(), 'updateinterval':feed.attributes['updateinterval'].value})
-    for setName in feedsList:
-        val = setName[0]
-        print "%s = %s " % (setName,val)
-        print "url = %s " % feedsList[setName]
+    #for setName in feedsList:
+        #val = setName[0]
+        #print "%s = %s " % (setName,val)
+        #print "url = %s " % feedsList[setName]
         #for set in feedsList[setName]:
         #    print "SET = %s" % set
-        for feed in feedsList[setName]['feedslist']:
-            print "url = %s " % feed['url']
+        #for feed in feedsList[setName]['feedslist']:
+            #print "url = %s " % feed['url']
     #print "URL = %s " % feedsList['set1']
 
 get_time = time.time() + (60)    
@@ -201,7 +201,7 @@ while (not xbmc.abortRequested):
         i = 0
         for feed in feedsList[setName]['feedslist']:
             i += 1
-            print "=>url = %s " % feed['url']
+            #print "=>url = %s " % feed['url']
             #Pour éviter les erreurs avec des & et espaces mal encodés
             encurl = feed['url'].replace("amp;", "&").replace(' ', '%20')
 
