@@ -96,8 +96,7 @@ def ParseRSS(RssName):
                 #Recupere un media associe
                 if entry.has_key('enclosures'):
                     if entry.enclosures:
-                        #print "Enclosure = %s " % entry.enclosures[0].href
-                        #print "Enclosure = %s " % entry.enclosures[0].type
+                        #print "Enclosure = %s " % entry.enclosures[0]
                         #actuellement que les images
                         if 'image' in entry.enclosures[0].type:
                             link_img = entry.enclosures[0].href
@@ -105,6 +104,14 @@ def ParseRSS(RssName):
                         if 'video' in entry.enclosures[0].type:
                             link_video = entry.enclosures[0].href
                             print "link_video = %s " % link_video
+                if entry.has_key('media_thumbnail'):
+                    #print "media_thumbnail % s" % entry['media_thumbnail']
+                    #Ajout d'une image en vignettei comme il peut
+                    #y en avoir plusieurs on les parcours toutes
+                    for thumb in entry['media_thumbnail']:
+                            print "thumb = %s " % thumb['url']
+                            link_img = thumb['url']
+                            img_name = download(RssFeeds,link_img,'/tmp/img.jpg')
                 #C'est ici que le recupere la news
                 if entry.has_key('content') and len(entry['content']) >= 1:
                     description = unicode(entry['content'][0].value)
