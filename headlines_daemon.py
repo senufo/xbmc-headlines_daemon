@@ -53,14 +53,14 @@ def htmlentitydecode(s):
     # Then convert hexa entities (such as &#x00E9;)
     return re.sub(u'&#x(\w+);', lambda x: unichr(int(x.group(1),16)), t)
 
-def cleanText(txt):
-    p = re.compile(r'\s+')
-    txt = p.sub(' ', txt)
+#def cleanText(txt):
+#    p = re.compile(r'\s+')
+#    txt = p.sub(' ', txt)
     
-    txt = htmlentitydecode(txt)
-    
-    p = re.compile(r'<[^<]*?/?>')
-    return p.sub('', txt)
+#    txt = htmlentitydecode(txt)
+#    
+#    p = re.compile(r'<[^<]*?/?>')
+#    return p.sub('', txt)
  
  
 def ParseRSS(RssName):
@@ -90,6 +90,8 @@ def ParseRSS(RssName):
     #et date
     if doc.status < 400:
         for entry in doc['entries']:
+            #On vide les commentaires 
+            Reponses = '[CR]<p>==== COMMENTAIRES ====</p>[CR]'
             try:
                 #On efface toutes les anciennes images des flux
                 if not os.path.isdir('%s-img' % RssFeeds) : os.mkdir('%s-img' % RssFeeds)
@@ -128,12 +130,34 @@ def ParseRSS(RssName):
                     #Si pas de content on essaye le summary_detail
                     description = unicode(entry['summary_detail'].value)
                     type = 'text'
+                #Lit les commentaires
+                if entry.has_key('wfw_commentrss'):
+                    link_comment = entry['wfw_commentrss']
+                    print "link_comment = %s " % entry['wfw_commentrss']
+                    comments = feedparser.parse(link_comment)
+                    if comments.status < 400:
+                        for commentaire in comments['entries']:
+                            try:
+                                #if commentaire.has_hey('title'):
+                                msg = 'Titre : %s [CR]' % unicode(commentaire['title'])
+                                Reponses += msg
+                                if commentaire.has_key('content') and len(commentaire['content']) >= 1:
+                                    Reponses += '<div><p>'
+                                    Reponses += unicode(commentaire['content'][0].value)
+                                    Reponses += '</p></div>[CR]'
+                                #if commentaire.has_hey('author'):
+                                Reponses += 'Auteur : %s [CR][CR]' % unicode(commentaire['author'])
+
+                            except AttributeError, e:
+                                print "Comment AttributeError : %s, commentaire = %s " % (str(e), commentaire)
+ 
                 #Recuperation de la date de la news
                 if entry.has_key('date'):
                     date = entry['date']
                 else:
                     date = 'unknown'
                 #On rempli les news
+                description += Reponses
                 headlines.append((title, date, description, type, img_name,
                                   link_video))
                 NbNews += 1
@@ -219,7 +243,7 @@ while (not xbmc.abortRequested):
                             #On parse le fichier rss et on le sauve sur le disque
                             doc = feedparser.parse('file://%s' % RssFeeds)
                             #print "Version = %s " % doc.version
-                        except e:
+                        except IOError, e:
                             print "Erreur urllib : %s " % str(e)
                         if doc.version != '':
                             #Sauve le doc parse directement
@@ -240,25 +264,30 @@ while (not xbmc.abortRequested):
                 else:
                     #Le fichier n'existe pas on le telecharge
                     #urllib.urlretrieve(feed['url'], filename = RssFeeds)
-                    urllib.urlretrieve(encurl, filename = RssFeeds)
-                    #On parse le fichier rss et on le sauve sur le disque
-                    #print "Download = %s " % RssFeeds
-                    doc = feedparser.parse('file://%s' % RssFeeds)
-                    #print "Version 248 = %s " % doc.version
-                    #Vérifie si c'est un flux rss ou atom
-                    if doc.version != '':
-                        #Sauve le doc parse directement
-                        output = open(('%s-pickle' % RssFeeds), 'wb')
-                        # Pickle dictionary using protocol 0.
-                        pickle.dump(doc, output)
-                        output.close()
-                        ParseRSS(RssFeeds)
-                    #On ignore le flux
-                    else:
-                        print "Erreur RSS : %s " % RssFeeds
-                        locstr = "Erreur : %s " % RssFeeds
-                        xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
+                    #Ajoute erreur timeout si pb de connexion
+                    try:
+                        urllib.urlretrieve(encurl, filename = RssFeeds)
+                        #On parse le fichier rss et on le sauve sur le disque
+                        #print "Download = %s " % RssFeeds
+                        doc = feedparser.parse('file://%s' % RssFeeds)
+                        #print "Version 248 = %s " % doc.version
+                        #Vérifie si c'est un flux rss ou atom
+                        if doc.version != '':
+                            #Sauve le doc parse directement
+                            output = open(('%s-pickle' % RssFeeds), 'wb')
+                            # Pickle dictionary using protocol 0.
+                            pickle.dump(doc, output)
+                            output.close()
+                            ParseRSS(RssFeeds)
+                        #On ignore le flux
+                        else:
+                            print "Erreur RSS : %s " % RssFeeds
+                            locstr = "Erreur : %s " % RssFeeds
+                            xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
                                             (locstr, 'Flux RSS non reconnu'))
+                    except IOError, e:
+                            print "Erreur urllib : %s " % str(e)
+
     #initialise start time
     start_time = time.time()
     time.sleep( .5 )
