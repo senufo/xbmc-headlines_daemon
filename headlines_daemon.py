@@ -61,7 +61,8 @@ def cleanText(txt):
     
     p = re.compile(r'<[^<]*?/?>')
     return p.sub('', txt)
-  
+ 
+ 
 def ParseRSS(RssName):
     """
     Parse RSS or ATOM file with feedparser
@@ -112,6 +113,12 @@ def ParseRSS(RssName):
                             print "thumb = %s " % thumb['url']
                             link_img = thumb['url']
                             img_name = download(RssFeeds,link_img,'/tmp/img.jpg')
+                #Video YouTube
+                if entry.has_key('media_content'):
+                    #Recupere les videos, Youtubes et autres ?
+                    link_video =  entry.media_content[0]['url']
+                    print "link_video youtube = %s " % link_video
+                    
                 #C'est ici que le recupere la news
                 if entry.has_key('content') and len(entry['content']) >= 1:
                     description = unicode(entry['content'][0].value)
