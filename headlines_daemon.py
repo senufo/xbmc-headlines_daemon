@@ -24,6 +24,9 @@ __language__   = Addon.getLocalizedString
 __profile__    = xbmc.translatePath(Addon.getAddonInfo('profile'))
 __resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources',
                                                  'lib'))
+
+DEBUG = True
+
 def download(path,src,dst):
     """
     Download image and caching in script directory
@@ -34,40 +37,11 @@ def download(path,src,dst):
     urllib.urlretrieve(src, filename = tmpname)
     return tmpname
 
-#Nettoie le code HTML d'après rssclient de xbmc
-def htmlentitydecode(s):
-    # code from http://snipplr.com/view.php?codeview&id=15261
-    # First convert alpha entities (such as &eacute;)
-    # (Inspired from http://mail.python.org/pipermail/python-list/2007-June/443813.html)
-    def entity2char(m):
-        entity = m.group(1)
-        if entity in htmlentitydefs.name2codepoint:
-            return unichr(htmlentitydefs.name2codepoint[entity])
-        return u" "  # Unknown entity: We replace with a space.
-    
-    t = re.sub(u'&(%s);' % u'|'.join(htmlentitydefs.name2codepoint), entity2char, s)
-  
-    # Then convert numerical entities (such as &#233;)
-    t = re.sub(u'&#(\d+);', lambda x: unichr(int(x.group(1))), t)
-   
-    # Then convert hexa entities (such as &#x00E9;)
-    return re.sub(u'&#x(\w+);', lambda x: unichr(int(x.group(1),16)), t)
-
-#def cleanText(txt):
-#    p = re.compile(r'\s+')
-#    txt = p.sub(' ', txt)
-    
-#    txt = htmlentitydecode(txt)
-#    
-#    p = re.compile(r'<[^<]*?/?>')
-#    return p.sub('', txt)
- 
- 
 def ParseRSS(RssName):
     """
     Parse RSS or ATOM file with feedparser
     """
-    print "RssName = %s " % RssName
+    if DEBUG == True: print "RssName = %s " % RssName
     #Recupere l'adresse du flux dans self.RssFeedName
     RssFeeds = RssName
     NbNews = 0
@@ -106,20 +80,20 @@ def ParseRSS(RssName):
                             img_name = download(RssFeeds,link_img,'/tmp/img.jpg')
                         if 'video' in entry.enclosures[0].type:
                             link_video = entry.enclosures[0].href
-                            print "link_video = %s " % link_video
+                            if DEBUG == True: print "link_video = %s " % link_video
                 if entry.has_key('media_thumbnail'):
                     #print "media_thumbnail % s" % entry['media_thumbnail']
                     #Ajout d'une image en vignettei comme il peut
                     #y en avoir plusieurs on les parcours toutes
                     for thumb in entry['media_thumbnail']:
-                            print "thumb = %s " % thumb['url']
+                            if DEBUG == True: print "thumb = %s " % thumb['url']
                             link_img = thumb['url']
                             img_name = download(RssFeeds,link_img,'/tmp/img.jpg')
                 #Video YouTube
                 if entry.has_key('media_content'):
                     #Recupere les videos, Youtubes et autres ?
                     link_video =  entry.media_content[0]['url']
-                    print "link_video youtube = %s " % link_video
+                    if DEBUG == True: print "link_video youtube = %s " % link_video
                     
                 #C'est ici que le recupere la news
                 if entry.has_key('content') and len(entry['content']) >= 1:
@@ -133,7 +107,7 @@ def ParseRSS(RssName):
                 #Lit les commentaires
                 if entry.has_key('wfw_commentrss'):
                     link_comment = entry['wfw_commentrss']
-                    print "link_comment = %s " % entry['wfw_commentrss']
+                    if DEBUG == True: print "link_comment = %s " % entry['wfw_commentrss']
                     comments = feedparser.parse(link_comment)
                     if comments.status < 400:
                         for commentaire in comments['entries']:
@@ -149,7 +123,7 @@ def ParseRSS(RssName):
                                 Reponses += 'Auteur : %s [CR][CR]' % unicode(commentaire['author'])
 
                             except AttributeError, e:
-                                print "Comment AttributeError : %s, commentaire = %s " % (str(e), commentaire)
+                                if DEBUG == True: print "Comment AttributeError : %s, commentaire = %s " % (str(e), commentaire)
  
                 #Recuperation de la date de la news
                 if entry.has_key('date'):
@@ -260,7 +234,7 @@ while (not xbmc.abortRequested):
                                                 (locstr, 'Flux RSS non reconnu'))
 
 
-                        print "date = %f, epoc time = %f  " % (date_modif, time.time())
+                        if DEBUG == True: print "date = %f, epoc time = %f  " % (date_modif, time.time())
                 else:
                     #Le fichier n'existe pas on le telecharge
                     #urllib.urlretrieve(feed['url'], filename = RssFeeds)
