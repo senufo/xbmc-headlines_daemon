@@ -25,7 +25,7 @@ __profile__    = xbmc.translatePath(Addon.getAddonInfo('profile'))
 __resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources',
                                                  'lib'))
 
-DEBUG = True
+DEBUG = False
 
 def download(path,src,dst):
     """
@@ -65,7 +65,8 @@ def ParseRSS(RssName):
     if doc.status < 400:
         for entry in doc['entries']:
             #On vide les commentaires 
-            Reponses = '[CR]<p>==== COMMENTAIRES ====</p>[CR]'
+            #Reponses = '[CR]<p>==== COMMENTAIRES ====</p>[CR]'
+            Reponses = ' '
             try:
                 #On efface toutes les anciennes images des flux
                 if not os.path.isdir('%s-img' % RssFeeds) : os.mkdir('%s-img' % RssFeeds)
@@ -109,12 +110,12 @@ def ParseRSS(RssName):
                     link_comment = entry['wfw_commentrss']
                     if DEBUG == True: print "link_comment = %s " % entry['wfw_commentrss']
                     comments = feedparser.parse(link_comment)
-                    if comments.status < 400:
+                    #if comments.status < 400:
+                    if comments.feed:
                         for commentaire in comments['entries']:
                             try:
                                 #if commentaire.has_hey('title'):
-                                msg = 'Titre : %s [CR]' % unicode(commentaire['title'])
-                                Reponses += msg
+                                Reponses += 'Titre : %s [CR]' % unicode(commentaire['title'])
                                 if commentaire.has_key('content') and len(commentaire['content']) >= 1:
                                     Reponses += '<div><p>'
                                     Reponses += unicode(commentaire['content'][0].value)
