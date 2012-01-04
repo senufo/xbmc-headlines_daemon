@@ -213,7 +213,11 @@ while (not xbmc.abortRequested):
                         try:
                             urllib.urlretrieve(encurl, filename = RssFeeds)
                             #On efface le doc deja parser
-                            os.remove('%s-pickle' % RssFeeds)
+                            try:
+                                os.remove('%s-pickle' % RssFeeds)
+                            except OSError, e:
+                                print "Error : %s " % str(e)
+
                             #On le parse de nouveau
                             #On parse le fichier rss et on le sauve sur le disque
                             doc = feedparser.parse('file://%s' % RssFeeds)
