@@ -17,6 +17,17 @@ class ParseRSS:
     def __init__(self):
         pass
 
+    def download(self,path,src,dst):
+        """
+        Download image and caching in script directory
+        """
+        tmpname = ('%s-img/%s' % (path,xbmc.getCacheThumbName(src)))
+        if os.path.exists(tmpname):
+            os.remove(tmpname)
+        urllib.urlretrieve(src, filename = tmpname)
+        return tmpname
+
+
     def Run(self, RssName):
         """
         Parse RSS or ATOMM fole with feedparser
@@ -58,7 +69,7 @@ class ParseRSS:
                             #actuellement que les images
                             if 'image' in entry.enclosures[0].type:
                                 link_img = entry.enclosures[0].href
-                                img_name = download(RssFeeds,link_img,'/tmp/img.jpg')
+                                img_name = self.download(RssFeeds,link_img,'/tmp/img.jpg')
                             if 'video' in entry.enclosures[0].type:
                                 link_video = entry.enclosures[0].href
                                 if DEBUG == True: print "link_video = %s " % link_video
@@ -69,7 +80,7 @@ class ParseRSS:
                         for thumb in entry['media_thumbnail']:
                             if DEBUG == True: print "thumb = %s " % thumb['url']
                             link_img = thumb['url']
-                            img_name = download(RssFeeds,link_img,'/tmp/img.jpg')
+                            img_name = self.download(RssFeeds,link_img,'/tmp/img.jpg')
                      #Video YouTube
                     if entry.has_key('media_content'):
                         #Recupere les videos, Youtubes et autres ?
