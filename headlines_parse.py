@@ -14,8 +14,7 @@ import urllib
 DEBUG = True
 
 class ParseRSS:
-    def init():
-        
+    def __init__(self):
         pass
 
     def Run(self, RssName):

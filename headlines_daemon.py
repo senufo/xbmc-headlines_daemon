@@ -6,7 +6,7 @@ import os, time, stat, re, copy, time
 from xml.dom.minidom import parse, Document, _write_data, Node, Element
 import pickle
 import glob
-import rss
+from headlines_parse import *
 
 # rdf modules
 import feedparser
@@ -231,7 +231,8 @@ while (not xbmc.abortRequested):
                             # Pickle dictionary using protocol 0.
                             pickle.dump(doc, output)
                             output.close()
-                            ParseRSS(RssFeeds)
+                            RSStream = ParseRSS()
+                            RSStream.Run(RssFeeds)
                         #On ignore le flux
                         else:
                             print "Erreur RSS : %s " % RssFeeds
@@ -258,7 +259,8 @@ while (not xbmc.abortRequested):
                             # Pickle dictionary using protocol 0.
                             pickle.dump(doc, output)
                             output.close()
-                            ParseRSS(RssFeeds)
+                            RSStream = ParseRSS()
+                            RSSTream.Run(RssFeeds)
                         #On ignore le flux
                         else:
                             print "Erreur RSS : %s " % RssFeeds
