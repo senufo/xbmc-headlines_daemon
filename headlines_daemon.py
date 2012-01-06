@@ -6,6 +6,7 @@ import os, time, stat, re, copy, time
 from xml.dom.minidom import parse, Document, _write_data, Node, Element
 import pickle
 import glob
+import rss
 
 # rdf modules
 import feedparser
@@ -37,7 +38,7 @@ def download(path,src,dst):
     urllib.urlretrieve(src, filename = tmpname)
     return tmpname
 
-def ParseRSS(RssName):
+def ParseRSS1(RssName):
     """
     Parse RSS or ATOM file with feedparser
     """
