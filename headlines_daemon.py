@@ -74,7 +74,10 @@ while (not xbmc.abortRequested):
             #if (current_time > (get_time + updateinterval)):
             if True:
                 get_time = time.time()
-                #On recuper l'url et on la transforme en non de fichier
+                RSStream = ParseRSS()
+                RSStream.getRSS(feed['url'],updateinterval)
+            else:
+                #On recupere l'url et on la transforme en nom de fichier
                 filename = feed['url']
                 filename = re.sub('^http://.*/','Rss-',filename)
                 RssFeeds = '%s/%s' % (DATA_PATH,filename)
