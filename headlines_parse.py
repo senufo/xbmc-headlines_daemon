@@ -34,7 +34,7 @@ class ParseRSS:
         """
         Parse RSS or ATOMM fole with feedparser
         """
-        if DEBUG == True: print "RssName = %s " % RssName
+        if DEBUG == True: print "[headlines_parse] RssName = %s " % RssName
         #Recupere l'adresse du flux dans self.RssFeedName
         RssFeeds = RssName
         NbNews = 0
@@ -74,20 +74,20 @@ class ParseRSS:
                                 img_name = self.download(RssFeeds,link_img,'/tmp/img.jpg')
                             if 'video' in entry.enclosures[0].type:
                                 link_video = entry.enclosures[0].href
-                                if DEBUG == True: print "link_video = %s " % link_video
+                                if DEBUG == True: print "[headlines_parse] link_video = %s " % link_video
                     if entry.has_key('media_thumbnail'):
                         #print "media_thumbnail % s" % entry['media_thumbnail']
                         #Ajout d'une image en vignettei comme il peut
                         #y en avoir plusieurs on les parcours toutes
                         for thumb in entry['media_thumbnail']:
-                            if DEBUG == True: print "thumb = %s " % thumb['url']
+                            if DEBUG == True: print "[headlines_parse] thumb = %s " % thumb['url']
                             link_img = thumb['url']
                             img_name = self.download(RssFeeds,link_img,'/tmp/img.jpg')
                      #Video YouTube
                     if entry.has_key('media_content'):
                         #Recupere les videos, Youtubes et autres ?
                         link_video =  entry.media_content[0]['url']
-                        if DEBUG == True: print "link_video youtube = %s " % link_video
+                        if DEBUG == True: print "[headlines_parse] link_video youtube = %s " % link_video
                     
                     #C'est ici que le recupere la news
                     if entry.has_key('content') and len(entry['content']) >= 1:
@@ -101,7 +101,7 @@ class ParseRSS:
                     #Lit les commentaires
                     if entry.has_key('wfw_commentrss'):
                         link_comment = entry['wfw_commentrss']
-                        if DEBUG == True: print "link_comment = %s " % entry['wfw_commentrss']
+                        if DEBUG == True: print "[headlines_parse] link_comment = %s " % entry['wfw_commentrss']
                         comments = feedparser.parse(link_comment)
                         #if comments.status < 400:
                         if comments.feed:
@@ -117,7 +117,7 @@ class ParseRSS:
                                     Reponses += 'Auteur : %s [CR][CR]' % unicode(commentaire['author'])
 
                                 except AttributeError, e:
-                                    if DEBUG == True: print "Comment AttributeError : %s, commentaire = %s " % (str(e), commentaire)
+                                    if DEBUG == True: print "[headlines_parse] Comment AttributeError : %s, commentaire = %s " % (str(e), commentaire)
  
                      #Recuperation de la date de la news
                     if entry.has_key('date'):
@@ -133,7 +133,7 @@ class ParseRSS:
                     img_name = ' '
                     link_video = 'False'
                 except AttributeError, e:
-                    print "AttributeError : %s" % str(e)
+                    print "[headlines_parse] AttributeError : %s" % str(e)
                     pass
         else:
             print ('Error %s, getting %r' % (doc.status, url))
@@ -143,12 +143,16 @@ class ParseRSS:
         pickle.dump(headlines, output)
         output.close()
 
-    def getRSS(self,url,updateinterval):
+    def getRSS(self,url):
+        if DEBUG == True: print "[headlines_parse] RssURL = %s " % url
+        updateinterval = 1
         filename = url
         filename = re.sub('^http://.*/','Rss-',filename)
         RssFeeds = '%s/%s' % (self.DATA_PATH,filename)
+        if DEBUG == True: print "[headlines_parse] 152"
         #teste si le fichier existe
         if (os.path.isfile(RssFeeds)):
+            if DEBUG == True: print "[headlines_parse] 155"
             date_modif = os.stat(RssFeeds).st_mtime
             diff = time.time() - date_modif
             #print "diff = %f, date_modif = %f, updateinterval %d" % (diff,date_modif,updateinterval )
@@ -163,14 +167,14 @@ class ParseRSS:
                     try:
                         os.remove('%s-pickle' % RssFeeds)
                     except OSError, e:
-                        print "Error : %s " % str(e)
+                        print "[headlines_parse] Error : %s " % str(e)
 
                     #On le parse de nouveau
                     #On parse le fichier rss et on le sauve sur le disque
                     doc = feedparser.parse('file://%s' % RssFeeds)
                     #print "Version = %s " % doc.version
                 except IOError, e:
-                    print "Erreur urllib : %s " % str(e)
+                    print "[headlines_parse] Erreur urllib : %s " % str(e)
                 if doc.version != '':
                     #Sauve le doc parse directement
                     output = open(('%s-pickle' % RssFeeds), 'wb')
@@ -181,18 +185,20 @@ class ParseRSS:
                     self.Run(RssFeeds)
                 #On ignore le flux
                 else:
-                    print "Erreur RSS : %s " % RssFeeds
+                    print "[headlines_parse] Erreur RSS : %s " % RssFeeds
                     locstr = "Erreur : %s " % RssFeeds
                     xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
                                         (locstr, 'Flux RSS non reconnu'))
 
 
-                if DEBUG == True: print "date = %f, epoc time = %f  " % (date_modif, time.time())
-            else:
+                if DEBUG == True: print "[headlines_parse] date = %f, epoc time = %f  " % (date_modif, time.time())
+        else:
+                if DEBUG == True: print "[headlines_parse] 196Telecharge RssURL = %s " % url
                 #Le fichier n'existe pas on le telecharge
                 #urllib.urlretrieve(feed['url'], filename = RssFeeds)
                 #Ajoute erreur timeout si pb de connexion
                 try:
+                    if DEBUG == True: print "[headlines_parse] Telecharge RssURL = %s " % url
                     urllib.urlretrieve(url, filename = RssFeeds)
                     #On parse le fichier rss et on le sauve sur le disque
                     #print "Download = %s " % RssFeeds
@@ -209,10 +215,10 @@ class ParseRSS:
                         self.Run(RssFeeds)
                         #On ignore le flux
                     else:
-                        print "Erreur RSS : %s " % RssFeeds
+                        print "[headlines_parse] Erreur RSS : %s " % RssFeeds
                         locstr = "Erreur : %s " % RssFeeds
                         xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
                                             (locstr, 'Flux RSS non reconnu'))
                 except IOError, e:
-                    print "Erreur urllib : %s " % str(e)
+                    print "[headlines_parse] Erreur urllib : %s " % str(e)
 

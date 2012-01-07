@@ -74,8 +74,24 @@ while (not xbmc.abortRequested):
             #if (current_time > (get_time + updateinterval)):
             if True:
                 get_time = time.time()
-                RSStream = ParseRSS()
-                RSStream.getRSS(feed['url'],updateinterval)
+                #On recupere l'url et on la transforme en nom de fichier
+                filename = feed['url']
+                filename = re.sub('^http://.*/','Rss-',filename)
+                RssFeeds = '%s/%s' % (DATA_PATH,filename)
+
+                #teste si le fichier du flux existe
+                if (os.path.isfile(RssFeeds)):
+                    date_modif = os.stat(RssFeeds).st_mtime
+                    diff = time.time() - date_modif
+                    #Si le flux est plus ancien que le updateinterval on le telecharge de nx
+                    if (diff > updateinterval):
+                        RSStream = ParseRSS()
+                        RSStream.getRSS(feed['url'])
+                #Le fichier n'existe pas on le telecharge
+                else:
+                    RSStream = ParseRSS()
+                    RSStream.getRSS(feed['url'])
+
             else:
                 #On recupere l'url et on la transforme en nom de fichier
                 filename = feed['url']
