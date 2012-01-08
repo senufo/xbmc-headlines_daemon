@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-import xbmc, xbmcgui
+import xbmc
 import xbmcaddon
 #python modules
-import os, time, stat, re, copy, time
-from xml.dom.minidom import parse, Document, _write_data, Node, Element
+import os, time, re 
+from xml.dom.minidom import parse 
 import pickle
-import glob
 from headlines_parse import *
 
 # rdf modules
@@ -23,14 +22,24 @@ __version__    = Addon.getAddonInfo('version')
 __language__   = Addon.getLocalizedString
 
 __profile__    = xbmc.translatePath(Addon.getAddonInfo('profile'))
-__resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources',
+__resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources', 
                                                  'lib'))
 
-DEBUG = False
+#DEBUG = False
+DEBUG_LOG = True
+#Function Debug
+def debug_log(msg):
+    """
+    print message if DEBUG_LOG == True
+    """
+    if DEBUG_LOG == True: print " [headlines_daemon] : %s " % ( msg)
+
 
 #Teste si le repertoire script.headlines existe
-DATA_PATH = xbmc.translatePath( "special://profile/addon_data/script.headlines/")
-if not os.path.exists(DATA_PATH): os.makedirs(DATA_PATH)
+DATA_PATH = xbmc.translatePath( 
+        "special://profile/addon_data/script.headlines/")
+if not os.path.exists(DATA_PATH): 
+    os.makedirs(DATA_PATH)
 
 RssFeedsPath = xbmc.translatePath('special://userdata/RssFeeds.xml')
 try:
@@ -51,7 +60,9 @@ if feedsTree:
         #get feedslist
         feeds = s.getElementsByTagName('feed')
         for feed in feeds:
-            feedsList[setName]['feedslist'].append({'url':feed.firstChild.toxml(), 'updateinterval':feed.attributes['updateinterval'].value})
+            feedsList[setName]['feedslist'].append(
+                {'url':feed.firstChild.toxml(), 
+                 'updateinterval':feed.attributes['updateinterval'].value})
 
 get_time = time.time() + (60)    
 
@@ -76,14 +87,15 @@ while (not xbmc.abortRequested):
                 get_time = time.time()
                 #On recupere l'url et on la transforme en nom de fichier
                 filename = feed['url']
-                filename = re.sub('^http://.*/','Rss-',filename)
-                RssFeeds = '%s/%s' % (DATA_PATH,filename)
+                filename = re.sub('^http://.*/', 'Rss-', filename)
+                RssFeeds = '%s/%s' % (DATA_PATH, filename)
 
                 #teste si le fichier du flux existe
                 if (os.path.isfile(RssFeeds)):
                     date_modif = os.stat(RssFeeds).st_mtime
                     diff = time.time() - date_modif
-                    #Si le flux est plus ancien que le updateinterval on le telecharge de nx
+                    #Si le flux est plus ancien que 
+                    #le updateinterval on le telecharge de nx
                     if (diff > updateinterval):
                         RSStream = ParseRSS()
                         RSStream.getRSS(feed['url'])
@@ -95,16 +107,15 @@ while (not xbmc.abortRequested):
             else:
                 #On recupere l'url et on la transforme en nom de fichier
                 filename = feed['url']
-                filename = re.sub('^http://.*/','Rss-',filename)
-                RssFeeds = '%s/%s' % (DATA_PATH,filename)
+                filename = re.sub('^http://.*/', 'Rss-', filename)
+                RssFeeds = '%s/%s' % (DATA_PATH, filename)
                 #teste si le fichier existe
                 if (os.path.isfile(RssFeeds)):
                     date_modif = os.stat(RssFeeds).st_mtime
                     diff = time.time() - date_modif
-                    #print "diff = %f, date_modif = %f, updateinterval %d" % (diff,date_modif,updateinterval )
-                    #Si le flux est plus ancien que le updateinterval on le telecharge de nx
+                    #Si le flux est plus ancien que 
+                    #le updateinterval on le telecharge de nx
                     if (diff > updateinterval):
-                        #print "=>filename = %s, RssFeeds = %s, url = %s, encurl = %s" % (filename,RssFeeds, feed['url'], encurl)
                         #urllib.urlretrieve(feed['url'], filename = RssFeeds)
                         #Test au cas ou pb de connexion
                         try:
@@ -116,7 +127,8 @@ while (not xbmc.abortRequested):
                                 print "Error : %s " % str(e)
 
                             #On le parse de nouveau
-                            #On parse le fichier rss et on le sauve sur le disque
+                            #On parse le fichier rss et 
+                            #on le sauve sur le disque
                             doc = feedparser.parse('file://%s' % RssFeeds)
                             #print "Version = %s " % doc.version
                         except IOError, e:
@@ -133,11 +145,12 @@ while (not xbmc.abortRequested):
                         else:
                             print "Erreur RSS : %s " % RssFeeds
                             locstr = "Erreur : %s " % RssFeeds
-                            xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
-                                                (locstr, 'Flux RSS non reconnu'))
+                            xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)"
+                                             % (locstr, 'Flux RSS non reconnu'))
 
 
-                        if DEBUG == True: print "date = %f, epoc time = %f  " % (date_modif, time.time())
+                        debug_log( "date = %f, epoc time = %f  " % (date_modif,
+                                                                time.time()))
                 else:
                     #Le fichier n'existe pas on le telecharge
                     #urllib.urlretrieve(feed['url'], filename = RssFeeds)
@@ -161,10 +174,10 @@ while (not xbmc.abortRequested):
                         else:
                             print "Erreur RSS : %s " % RssFeeds
                             locstr = "Erreur : %s " % RssFeeds
-                            xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
-                                            (locstr, 'Flux RSS non reconnu'))
+                            xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)"
+                                          % (locstr, 'Flux RSS non reconnu'))
                     except IOError, e:
-                            print "Erreur urllib : %s " % str(e)
+                        print "Erreur urllib : %s " % str(e)
 
     #initialise start time
     start_time = time.time()
