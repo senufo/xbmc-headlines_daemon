@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+Get rss news in background for rss/atom reader : headlines
+"""
 import xbmc
 import xbmcaddon
 #python modules
-import os, time, re 
+import os, time, re, sys 
 from xml.dom.minidom import parse 
 import pickle
 from headlines_parse import *
@@ -26,7 +29,8 @@ __resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources',
                                                  'lib'))
 
 #DEBUG = False
-DEBUG_LOG = True
+#DEBUG_LOG = True
+DEBUG_LOG = False
 #Function Debug
 def debug_log(msg):
     """
@@ -42,10 +46,11 @@ if not os.path.exists(DATA_PATH):
     os.makedirs(DATA_PATH)
 
 RssFeedsPath = xbmc.translatePath('special://userdata/RssFeeds.xml')
+debug(RssFeedsPath)
 try:
     feedsTree = parse(RssFeedsPath)
 except:
-    print "Erreur self.feedsTree"
+    print "Erreur self.feedsTree : %s" % sys.exc_info()[0] 
 #Recupere la liste des flux dans RSSFeeds.xml
 if feedsTree:
     #self.feedsList = self.getCurrentRssFeeds()
@@ -78,7 +83,7 @@ while (not xbmc.abortRequested):
             #print "=>url = %s " % feed['url']
             #Pour éviter les erreurs avec des & et espaces mal encodés
             encurl = feed['url'].replace("amp;", "&").replace(' ', '%20')
-
+            debug('encurl = %s ' % encurl)
             updateinterval = int(feed['updateinterval']) * 60
             current_time = time.time()
             diff_time  = current_time - (get_time + updateinterval)
@@ -98,11 +103,11 @@ while (not xbmc.abortRequested):
                     #le updateinterval on le telecharge de nx
                     if (diff > updateinterval):
                         RSStream = ParseRSS()
-                        RSStream.getRSS(feed['url'])
+                        RSStream.getRSS(encurl)
                 #Le fichier n'existe pas on le telecharge
                 else:
                     RSStream = ParseRSS()
-                    RSStream.getRSS(feed['url'])
+                    RSStream.getRSS(encurl)
 
             else:
                 #On recupere l'url et on la transforme en nom de fichier
