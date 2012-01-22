@@ -29,13 +29,17 @@ class ParseRSS:
             "special://profile/addon_data/script.headlines/")
         if not os.path.exists(self.DATA_PATH): os.makedirs(self.DATA_PATH)
 
-    def download(self, path, src):
+    def download(self, path, src, NoNews):
         """
         Download image and caching in script directory
         """
-        tmpname = ('%s-img/%s' % (path, xbmc.getCacheThumbName(src)))
-        if os.path.exists(tmpname):
-            os.remove(tmpname)
+        if not os.path.isdir('%s-img/%d' % (path, NoNews)) : 
+            os.mkdir('%s-img/%d' % (path, NoNews))
+            debug('MKDIR = %s-img/%d' % (path, NoNews))
+        tmpname = ('%s-img/%d/%s' % (path, NoNews, xbmc.getCacheThumbName(src)))
+        debug('tmpname = %s ' % tmpname)
+        #if os.path.exists(tmpname):
+        #    os.remove(tmpname)
         urllib.urlretrieve(src, filename = tmpname)
         return tmpname
 
@@ -47,7 +51,7 @@ class ParseRSS:
         debug( " RssName = %s " % RssName )
         #Recupere l'adresse du flux dans self.RssFeedName
         RssFeeds = RssName
-        NbNews = 0
+        NbNews = 1
         # parse the document
         #Si c'est deja fait on lit le fichier 
         if (os.path.isfile('%s-pickle' % RssFeeds)):
@@ -83,7 +87,7 @@ class ParseRSS:
                             if 'image' in entry.enclosures[0].type:
                                 link_img = entry.enclosures[0].href
                                 img_name = self.download(
-                                            RssFeeds,link_img)
+                                            RssFeeds,link_img, NbNews)
                             if 'video' in entry.enclosures[0].type:
                                 link_video = entry.enclosures[0].href
                                 debug( " link_video = %s " %
@@ -97,7 +101,7 @@ class ParseRSS:
                                   thumb['url'] )
                             link_img = thumb['url']
                             img_name = self.download(
-                                RssFeeds,link_img)
+                                RssFeeds,link_img, NbNews)
                      #Video YouTube
                     if entry.has_key('media_content'):
                         #Recupere les videos, Youtubes et autres ?
@@ -147,6 +151,7 @@ class ParseRSS:
                     headlines.append((title, date, description, content_type, img_name,
                                       link_video))
                     NbNews += 1
+                    debug('NbNews = %d ' % NbNews)
                     #On vide le nom de l'image et l'adresse de la video  pour le prochain tour
                     img_name = ' '
                     link_video = 'False'
@@ -165,7 +170,7 @@ class ParseRSS:
         debug( " RssURL = %s " % url )
         updateinterval = 1
         filename = url
-        filename = re.sub('^http://.*/','Rss-', filename)
+        filename = re.sub('^http://.*/', 'Rss-', filename)
         RssFeeds = '%s/%s' % (self.DATA_PATH, filename)
         debug( " 152" )
         #teste si le fichier existe
