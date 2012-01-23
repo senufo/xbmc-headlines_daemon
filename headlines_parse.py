@@ -62,7 +62,7 @@ class ParseRSS:
             #Sinon on le parse
             doc = feedparser.parse('file://%s' % RssFeeds)
         #Récupère le titre du flux
-        img_name = ' '
+        img_name = ''
         link_video = 'False'
         #Vide les headlines lors d'un nouveau appel
         headlines = []
@@ -149,11 +149,11 @@ class ParseRSS:
                     #On rempli les news
                     description += Reponses
                     headlines.append((title, date, description, content_type, img_name,
-                                      link_video))
+                                      link_video, NbNews))
                     NbNews += 1
                     debug('NbNews = %d ' % NbNews)
                     #On vide le nom de l'image et l'adresse de la video  pour le prochain tour
-                    img_name = ' '
+                    img_name = ''
                     link_video = 'False'
                 except AttributeError, e:
                     print " AttributeError : %s" % str(e)
@@ -172,10 +172,8 @@ class ParseRSS:
         filename = url
         filename = re.sub('^http://.*/', 'Rss-', filename)
         RssFeeds = '%s/%s' % (self.DATA_PATH, filename)
-        debug( " 152" )
         #teste si le fichier existe
         if (os.path.isfile(RssFeeds)):
-            debug( " 155" )
             date_modif = os.stat(RssFeeds).st_mtime
             diff = time.time() - date_modif
             #print "diff = %f, date_modif = %f, updateinterval %d" % (diff,date_modif,updateinterval )
@@ -217,7 +215,7 @@ class ParseRSS:
                 debug( " date = %f, epoc time = %f  " %
                       (date_modif, time.time()) )
         else:
-            debug( " 196Telecharge RssURL = %s " % url )
+            debug( " Telecharge RssURL = %s " % url )
             #Le fichier n'existe pas on le telecharge
             #urllib.urlretrieve(feed['url'], filename = RssFeeds)
             #Ajoute erreur timeout si pb de connexion
