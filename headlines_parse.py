@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+Class to get and parse RSS/ATOM stream
+"""
 #import xbmc, xbmcgui
 import xbmc
 #import xbmcaddon
@@ -24,6 +27,9 @@ def debug(msg):
 
 class ParseRSS:
     def __init__(self):
+        """
+        Initialize DATA_PATH
+        """
         #Teste si le repertoire script.headlines existe
         self.DATA_PATH = xbmc.translatePath( 
             "special://profile/addon_data/script.headlines/")
@@ -167,79 +173,39 @@ class ParseRSS:
         output.close()
 
     def getRSS(self, url):
+        """
+        Get url rss for parse doc
+        """
         debug( " RssURL = %s " % url )
-        updateinterval = 1
+        #updateinterval = 1
         filename = url
         filename = re.sub('^http://.*/', 'Rss-', filename)
         RssFeeds = '%s/%s' % (self.DATA_PATH, filename)
-        #teste si le fichier existe
-        if (os.path.isfile(RssFeeds)):
-            date_modif = os.stat(RssFeeds).st_mtime
-            diff = time.time() - date_modif
-            #print "diff = %f, date_modif = %f, updateinterval %d" % (diff,date_modif,updateinterval )
-            #Si le flux est plus ancien que le updateinterval on le telecharge de nx
-            if (diff > updateinterval):
-                #print "=>filename = %s, RssFeeds = %s, url = %s, encurl = %s" % (filename,RssFeeds, feed['url'], encurl)
-                #urllib.urlretrieve(feed['url'], filename = RssFeeds)
-                #Test au cas ou pb de connexion
-                try:
-                    urllib.urlretrieve(url, filename = RssFeeds)
-                    #On efface le doc deja parser
-                    try:
-                        os.remove('%s-pickle' % RssFeeds)
-                    except OSError, e:
-                        print " Error : %s " % str(e)
-
-                    #On le parse de nouveau
-                    #On parse le fichier rss et on le sauve sur le disque
-                    doc = feedparser.parse('file://%s' % RssFeeds)
-                    #print "Version = %s " % doc.version
-                except IOError, e:
-                    print " Erreur urllib : %s " % str(e)
-                if doc.version != '':
-                    #Sauve le doc parse directement
-                    output = open(('%s-pickle' % RssFeeds), 'wb')
-                    # Pickle dictionary using protocol 0.
-                    pickle.dump(doc, output)
-                    output.close()
-                    #RSStream = self.ParseRSS()
-                    self.Run(RssFeeds)
-                #On ignore le flux
-                else:
-                    print " Erreur RSS : %s " % RssFeeds
-                    locstr = "Erreur : %s " % RssFeeds
-                    xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
-                                        (locstr, 'Flux RSS non reconnu'))
-
-
-                debug( " date = %f, epoc time = %f  " %
-                      (date_modif, time.time()) )
-        else:
-            debug( " Telecharge RssURL = %s " % url )
-            #Le fichier n'existe pas on le telecharge
-            #urllib.urlretrieve(feed['url'], filename = RssFeeds)
-            #Ajoute erreur timeout si pb de connexion
+        try:
+            urllib.urlretrieve(url, filename = RssFeeds)
+            #On efface le doc deja parser
             try:
-                debug( " Telecharge RssURL = %s " % url )
-                urllib.urlretrieve(url, filename = RssFeeds)
-                #On parse le fichier rss et on le sauve sur le disque
-                #print "Download = %s " % RssFeeds
-                doc = feedparser.parse('file://%s' % RssFeeds)
-                #print "Version 248 = %s " % doc.version
-                #Vérifie si c'est un flux rss ou atom
-                if doc.version != '':
-                    #Sauve le doc parse directement
-                    output = open(('%s-pickle' % RssFeeds), 'wb')
-                    # Pickle dictionary using protocol 0.
-                    pickle.dump(doc, output)
-                    output.close()
-                    #RSStream = self.ParseRSS()
-                    self.Run(RssFeeds)
-                    #On ignore le flux
-                else:
-                    print " Erreur RSS : %s " % RssFeeds
-                    locstr = "Erreur : %s " % RssFeeds
-                    xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
-                                            (locstr, 'Flux RSS non reconnu'))
-            except IOError, e:
-                print " Erreur urllib : %s " % str(e)
+                os.remove('%s-pickle' % RssFeeds)
+            except OSError, e:
+                print " Error : %s " % str(e)
+
+            #On le parse de nouveau
+            #On parse le fichier rss et on le sauve sur le disque
+            doc = feedparser.parse('file://%s' % RssFeeds)
+            #print "Version = %s " % doc.version
+        except IOError, e:
+            print " Erreur urllib : %s " % str(e)
+        if doc.version != '':
+            #Sauve le doc parse directement
+            output = open(('%s-pickle' % RssFeeds), 'wb')
+            # Pickle dictionary using protocol 0.
+            pickle.dump(doc, output)
+            output.close()
+            #RSStream = self.ParseRSS()
+            self.Run(RssFeeds)
+            #On ignore le flux
+        else:
+            print " Erreur RSS : %s " % RssFeeds
+            locstr = "Erreur : %s " % RssFeeds
+            xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
+                                  (locstr, 'Flux RSS non reconnu'))
