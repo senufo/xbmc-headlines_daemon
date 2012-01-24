@@ -2,21 +2,17 @@
 """
 Class to get and parse RSS/ATOM stream
 """
-#import xbmc, xbmcgui
 import xbmc
-#import xbmcaddon
 #python modules
-#import os, time, stat, re, copy, time
 import os, time, re
-#from xml.dom.minidom import parse, Document, _write_data, Node, Element
 import pickle
-#import glob
 
 # rdf modules
 import feedparser
 import urllib
 
-DEBUG_LOG = True
+#DEBUG_LOG = True
+DEBUG_LOG = False
 #Function Debug
 def debug(msg):
     """

@@ -29,8 +29,8 @@ __resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources',
                                                  'lib'))
 
 #DEBUG = False
-#DEBUG_LOG = True
-DEBUG_LOG = False
+DEBUG_LOG = True
+#DEBUG_LOG = False
 #Function Debug
 def debug_log(msg):
     """
@@ -83,7 +83,7 @@ while (not xbmc.abortRequested):
             #print "=>url = %s " % feed['url']
             #Pour éviter les erreurs avec des & et espaces mal encodés
             encurl = feed['url'].replace("amp;", "&").replace(' ', '%20')
-            debug('encurl = %s ' % encurl)
+            #debug('encurl = %s ' % encurl)
             updateinterval = int(feed['updateinterval']) * 60
             current_time = time.time()
             diff_time  = current_time - (get_time + updateinterval)
@@ -99,18 +99,22 @@ while (not xbmc.abortRequested):
                 if (os.path.isfile(RssFeeds)):
                     date_modif = os.stat(RssFeeds).st_mtime
                     diff = time.time() - date_modif
+                    debug_log('diff = %i, date_modif = %i, update = %d ' % (diff,
+                                                                        date_modif,updateinterval))
                     #Si le flux est plus ancien que 
                     #le updateinterval on le telecharge de nx
                     if (diff > updateinterval):
                         RSStream = ParseRSS()
                         RSStream.getRSS(encurl)
+                        debug_log('Appel getRSS')
                 #Le fichier n'existe pas on le telecharge
                 else:
                     RSStream = ParseRSS()
                     RSStream.getRSS(encurl)
+                    debug_log('Appel getRSS 114')
 
             else:
-                #On recupere l'url et on la transforme en nom de fichier
+                debug_log('#On recupere l url et on la transforme en nom de fichier')
                 filename = feed['url']
                 filename = re.sub('^http://.*/', 'Rss-', filename)
                 RssFeeds = '%s/%s' % (DATA_PATH, filename)
