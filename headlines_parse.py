@@ -58,6 +58,8 @@ class ParseRSS:
         #Recupere l'adresse du flux dans self.RssFeedName
         RssFeeds = RssName
         NbNews = 1
+        ImageCount = 0
+        SlideShowable = False
         # parse the document
         #Si c'est deja fait on lit le fichier 
         if (os.path.isfile('%s-pickle' % RssFeeds)):
@@ -94,6 +96,7 @@ class ParseRSS:
                                 link_img = entry.enclosures[0].href
                                 img_name = self.download(
                                             RssFeeds,link_img, NbNews)
+                                ImageCount += 1
                             if 'video' in entry.enclosures[0].type:
                                 link_video = entry.enclosures[0].href
                                 debug( " link_video = %s " %
@@ -108,6 +111,7 @@ class ParseRSS:
                             link_img = thumb['url']
                             img_name = self.download(
                                 RssFeeds,link_img, NbNews)
+                            ImageCount += 1
                      #Video YouTube
                     if entry.has_key('media_content'):
                         #Recupere les videos, Youtubes et autres ?
@@ -154,8 +158,12 @@ class ParseRSS:
                         date = 'unknown'
                     #On rempli les news
                     description += Reponses
+                    #Si il y a plusieurs image on peux faire un diaporama
+                    if ImageCount > 1:
+                        SlideShowable = True
                     headlines.append((title, date, description, content_type, img_name,
-                                      link_video, NbNews))
+                                      link_video, NbNews, ImageCount,
+                                      SlideShowable ))
                     NbNews += 1
                     debug('NbNews = %d ' % NbNews)
                     #On vide le nom de l'image et l'adresse de la video  pour le prochain tour
