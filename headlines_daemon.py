@@ -44,7 +44,18 @@ DATA_PATH = xbmc.translatePath(
         "special://profile/addon_data/script.headlines/")
 if not os.path.exists(DATA_PATH): 
     os.makedirs(DATA_PATH)
-
+#Si un repertoire existe deja on efface tous les fichiers
+else:
+    #On efface les réperetoires
+    dirs = glob.glob("%s/%s" % (DATA_PATH,'Rss*-img'))
+    for d in dirs:
+        shutil.rmtree(d)
+        files = glob.glob("%s/%s" %
+                        (DATA_PATH,'Rss*'))
+    #On efface les fichiers
+    for f in files:
+        os.remove(f)
+                                                                        
 RssFeedsPath = xbmc.translatePath('special://userdata/RssFeeds.xml')
 debug(RssFeedsPath)
 try:
