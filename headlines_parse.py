@@ -42,7 +42,12 @@ class ParseRSS:
         debug('tmpname = %s ' % tmpname)
         #if os.path.exists(tmpname):
         #    os.remove(tmpname)
-        urllib.urlretrieve(src, filename = tmpname)
+        #Traitement de l'erreur timeout
+        try:
+            urllib.urlretrieve(src, filename = tmpname)
+        except IOError, e:
+            print 'Erreur urllib.urlretrieve : %s ' % e
+
         return tmpname
 
 
@@ -157,8 +162,8 @@ class ParseRSS:
                     #Si il y a plusieurs image on peux faire un diaporama
                     if ImageCount > 1:
                         SlideShowable = True
-                    headlines.append((title, date, description, content_type, img_name,
-                                      link_video, NbNews, ImageCount,
+                    headlines.append((title, date, description, content_type, 
+                                      img_name, link_video, NbNews, ImageCount,
                                       SlideShowable ))
                     NbNews += 1
                     debug('NbNews = %d ' % NbNews)
