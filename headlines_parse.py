@@ -126,10 +126,14 @@ class ParseRSS:
                         #type contient le type de texte : 
                         #html, plain text, etc...
                         content_type = entry['content'][0].type
-                    else:
+                    elif entry.has_key('summary_detail'):
                         #Si pas de content on essaye le summary_detail
                         description = unicode(entry['summary_detail'].value)
                         content_type = 'text'
+                    else:
+                        description = 'Erreur lecture content'
+                        content_type = 'text'
+
                     #Lit les commentaires
                     if entry.has_key('wfw_commentrss'):
                         link_comment = entry['wfw_commentrss']
@@ -205,7 +209,7 @@ class ParseRSS:
         except IOError, e:
             print " Erreur urllib : %s " % str(e)
             #Si erreur on quitte sans traitement
-            return
+            RETURN
         if doc.version != '':
             #Sauve le doc parse directement
             output = open(('%s-pickle' % RssFeeds), 'wb')

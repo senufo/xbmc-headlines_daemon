@@ -7,7 +7,7 @@ import xbmcaddon
 #python modules
 import os, time, re, sys, glob, shutil
 from xml.dom.minidom import parse 
-import pickle
+#import pickle
 from headlines_parse import *
 
 # rdf modules
@@ -52,9 +52,12 @@ else:
         shutil.rmtree(d)
         files = glob.glob("%s/%s" %
                         (DATA_PATH,'Rss*'))
-    #On efface les fichiers
-    for f in files:
-        os.remove(f)
+    #On efface les fichiers si ils existent
+    try:
+        for f in files:
+            os.remove(f)
+    except:
+        debug( 'Pas de fichier' )
                                                                         
 RssFeedsPath = xbmc.translatePath('special://userdata/RssFeeds.xml')
 debug(RssFeedsPath)
@@ -105,13 +108,13 @@ while (not xbmc.abortRequested):
             filename = feed['url']
             filename = re.sub('^http://.*/', 'Rss-', filename)
             RssFeeds = '%s/%s' % (DATA_PATH, filename)
-
             #teste si le fichier du flux existe
             if (os.path.isfile(RssFeeds)):
                 date_modif = os.stat(RssFeeds).st_mtime
                 diff = time.time() - date_modif
+                debug_log( 'RssFeeds %s esxiste ' % RssFeeds)
                 debug_log('diff = %i, date_modif = %i, update = %d ' % (diff,
-                                                               date_modif,updateinterval))
+                                                    date_modif,updateinterval))
                 #Si le flux est plus ancien que 
                 #le updateinterval on le telecharge de nx
                 if (diff > updateinterval):
@@ -120,6 +123,7 @@ while (not xbmc.abortRequested):
                     debug_log('Appel getRSS')
             #Le fichier n'existe pas on le telecharge
             else:
+                debug_log( 'RssFeeds %s telecharge ' % str(RssFeeds) )
                 RSStream = ParseRSS()
                 RSStream.getRSS(encurl)
                 debug_log('Appel getRSS 114')
