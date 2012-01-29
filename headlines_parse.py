@@ -209,7 +209,7 @@ class ParseRSS:
         except IOError, e:
             print " Erreur urllib : %s " % str(e)
             #Si erreur on quitte sans traitement
-            RETURN
+            return 
         if doc.version != '':
             #Sauve le doc parse directement
             output = open(('%s-pickle' % RssFeeds), 'wb')

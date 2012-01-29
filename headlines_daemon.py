@@ -112,9 +112,9 @@ while (not xbmc.abortRequested):
             if (os.path.isfile(RssFeeds)):
                 date_modif = os.stat(RssFeeds).st_mtime
                 diff = time.time() - date_modif
-                debug_log( 'RssFeeds %s esxiste ' % RssFeeds)
-                debug_log('diff = %i, date_modif = %i, update = %d ' % (diff,
-                                                    date_modif,updateinterval))
+                #debug_log( 'RssFeeds %s existe ' % RssFeeds)
+                #debug_log('diff = %i, date_modif = %i, update = %d ' % (diff,
+                #                                    date_modif,updateinterval))
                 #Si le flux est plus ancien que 
                 #le updateinterval on le telecharge de nx
                 if (diff > updateinterval):
