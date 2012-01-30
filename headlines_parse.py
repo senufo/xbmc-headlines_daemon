@@ -11,8 +11,8 @@ import pickle
 import feedparser
 import urllib
 
-#DEBUG_LOG = True
-DEBUG_LOG = False
+DEBUG_LOG = True
+#DEBUG_LOG = False
 #Function Debug
 def debug(msg):
     """
@@ -28,7 +28,7 @@ class ParseRSS:
         """
         #Teste si le repertoire script.headlines existe
         self.DATA_PATH = xbmc.translatePath( 
-            "special://profile/addon_data/script.headlines/")
+            "special://profile/addon_data/script.headlines")
         if not os.path.exists(self.DATA_PATH): os.makedirs(self.DATA_PATH)
 
     def download(self, path, src, NoNews):
@@ -194,6 +194,9 @@ class ParseRSS:
         filename = url
         filename = re.sub('^http://.*/', 'Rss-', filename)
         RssFeeds = '%s/%s' % (self.DATA_PATH, filename)
+        RssFeeds = xbmc.translatePath( RssFeeds ) 
+        debug( "xbmc.translatePath( RssFeeds ) = %s "  % RssFeeds )
+
         try:
             urllib.urlretrieve(url, filename = RssFeeds)
             #On efface le doc deja parser
