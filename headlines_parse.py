@@ -213,17 +213,22 @@ class ParseRSS:
             print " Erreur urllib : %s " % str(e)
             #Si erreur on quitte sans traitement
             return 
-        if doc.version != '':
-            #Sauve le doc parse directement
-            output = open(('%s-pickle' % RssFeeds), 'wb')
-            # Pickle dictionary using protocol 0.
-            pickle.dump(doc, output)
-            output.close()
-            #RSStream = self.ParseRSS()
-            self.Run(RssFeeds)
-            #On ignore le flux
-        else:
-            print " Erreur RSS : %s " % RssFeeds
-            locstr = "Erreur : %s " % RssFeeds
-            xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
+        #Gestion de l'erreur si pas le parse n'est pas correct
+        try:
+            if doc.version != '':
+                #Sauve le doc parse directement
+                output = open(('%s-pickle' % RssFeeds), 'wb')
+                # Pickle dictionary using protocol 0.
+                pickle.dump(doc, output)
+                output.close()
+                #RSStream = self.ParseRSS()
+                self.Run(RssFeeds)
+                #On ignore le flux
+            else:
+                print " Erreur RSS : %s " % RssFeeds
+                locstr = "Erreur : %s " % RssFeeds
+                xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" %
                                   (locstr, 'Flux RSS non reconnu'))
+        except:
+            debug( 'Erreur doc.version ' )
+            return
