@@ -117,6 +117,21 @@ class ParseRSS:
                     if entry.has_key('media_content'):
                         #Recupere les videos, Youtubes et autres ?
                         link_video =  entry.media_content[0]['url']
+                        ############## Test YT link, à partir de rss.py
+                        if 'youtube.com/v' in link_video:
+                            vid_ids =  re.findall('http://www.youtube.com/v/(.{11})\??',
+                                       link_video, re.DOTALL )
+                            for id in vid_ids:
+                                test = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % id
+                                debug("VIDEO YT = %s " % test)
+            
+                        if 'youtube.com/watch' in link_video:
+                            vid_ids =  re.findall('youtube.com/watch\?v=(.{11})\??',
+                                       link_video, re.DOTALL )
+                            for id in vid_ids:
+                                test = 'plugin://plugin.video.youtube/?action=play_video&videoid=%s' % id
+                                debug("VIDEO YT = %s " % test)
+                        ################ Fin test YT link 
                         debug( " link_video youtube = %s " %
                               link_video )
                     
