@@ -83,6 +83,7 @@ class ParseRSS:
                 #On vide les commentaires 
                 #Reponses = '[CR]<p>==== COMMENTAIRES ====</p>[CR]'
                 Reponses = ' '
+                ImageCount = 0
                 try:
                     #On efface toutes les anciennes images des flux
                     if not os.path.isdir('%s-img' % RssFeeds) : 
