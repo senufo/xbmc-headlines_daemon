@@ -3,6 +3,7 @@
 Class to get and parse RSS/ATOM stream
 """
 import xbmc
+import xbmcaddon
 #python modules
 import os, time, re
 import pickle
@@ -11,8 +12,12 @@ import pickle
 import feedparser
 import urllib
 
-DEBUG_LOG = True
-#DEBUG_LOG = False
+##Affiche les msg de DEBUG
+Addon          = xbmcaddon.Addon('service.headlines_daemon')
+if Addon.getSetting('Debug') == 'true':
+    DEBUG_LOG = True
+else:
+    DEBUG_LOG = False
 #Function Debug
 def debug(msg):
     """

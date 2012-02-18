@@ -28,9 +28,12 @@ __profile__    = xbmc.translatePath(Addon.getAddonInfo('profile'))
 __resource__   = xbmc.translatePath(os.path.join(__cwd__, 'resources', 
                                                  'lib'))
 
-#DEBUG = False
-DEBUG_LOG = True
-#DEBUG_LOG = False
+##Affiche les msg de DEBUG
+addon_service = xbmcaddon.Addon('service.headlines_daemon')
+if addon_service.getSetting('Debug') == 'true':
+    DEBUG_LOG = True
+else:
+    DEBUG_LOG = False
 #Function Debug
 def debug_log(msg):
     """
